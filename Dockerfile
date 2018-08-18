@@ -2,17 +2,23 @@ FROM alpine:latest
 
 MAINTAINER Bastian Lemke <bastian@konschtanz.de>
 
-RUN apk update \
- && apk upgrade \
- && apk add --no-cache \
-            rsync \
-            openssh-server \
+RUN apk update && \
+	apk upgrade && \
+	apk add --no-cache \
+		rsync \
+        openssh-server \
  && rm -rf /var/cache/apk/*
 
-RUN ssh-keygen -A
+RUN sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+RUN cp /etc/ssh/sshd_config /sshd_config.backup
 
+VOLUME ["/etc/ssh"]
 VOLUME ["/root/.ssh"]
-VOLUME ["/backup"]
+VOLUME ["/data"]
 EXPOSE 22
 
-CMD    ["/usr/sbin/sshd", "-D"]
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/usr/sbin/sshd", "-D"]
