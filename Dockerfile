@@ -7,9 +7,11 @@ RUN apk update && \
 	apk add --no-cache \
 		rsync \
         openssh-server \
+        bash \
  && rm -rf /var/cache/apk/*
 
-RUN sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+# temporarily store a backup copy of sshd_config because /etc/ssh is overwritten by the
+# mounted host directory to store the generated host keys outside of the container
 RUN cp /etc/ssh/sshd_config /sshd_config.backup
 
 VOLUME ["/etc/ssh"]
